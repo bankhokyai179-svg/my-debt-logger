@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>บันทึกหนี้ออนไลน์ (Google Sheet)</title>
+    <title>บันทึกหนี้สิน (Frontend)</title>
     <!-- Tailwind CSS CDN for styling and Inter font -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
@@ -50,26 +50,32 @@
         .data-card {
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
         }
-        /* Modal styles are kept for the message box */
-        .modal-buttons button:last-child {
-            margin-left: 10px; 
-        }
     </style>
 </head>
 <body>
 
     <div class="container-wrapper">
-        <div class="bg-white rounded-2xl p-6 mb-8 data-card">
-            <h1 class="text-3xl font-bold text-center text-green-700 mb-2">☁️ บันทึกหนี้ออนไลน์ (G Sheet)</h1>
-            <p class="text-center text-sm text-gray-500 mb-4">ข้อมูลจะถูกส่งเข้า Google Sheet ทันที (Web App URL: <span class="text-blue-500 font-mono text-xs break-all">#REPLACE_WITH_YOUR_DEPLOYED_APPS_SCRIPT_URL#</span>)</p>
-             <p class="text-xs text-red-500 font-bold text-center mt-2">
-                ⚠️ **สำคัญ:** โปรดแทนที่ `#REPLACE_WITH_YOUR_DEPLOYED_APPS_SCRIPT_URL#` ในโค้ด JavaScript ด้านล่างด้วย URL จริงของคุณ
+        <div class="bg-white rounded-2xl p-6 mb-4 data-card">
+            <h1 class="text-3xl font-bold text-center text-green-700 mb-2">📸 บันทึกหนี้สิน (พร้อมกล้อง 100%)</h1>
+            <p class="text-center text-sm text-gray-500 mb-4">Frontend (UI/Camera/GPS) ถูกรันจาก GitHub Pages</p>
+            <p class="text-xs text-blue-500 font-bold text-center mt-2">
+                ✅ URL Apps Script: https://script.google.com/macros/s/AKfycbzPBRd_RaHkZKhH9Tkg9gfWq3I4B9O_G1I9m9RIYO_jHLV5a6KGc9kNq58sHr1OhUFf/exec
             </p>
         </div>
         
         <!-- === ส่วนที่ 1: ฟอร์มบันทึกข้อมูล === -->
         <div class="bg-white rounded-2xl p-6 mb-8 data-card">
             <h2 class="text-2xl font-semibold text-indigo-600 mb-4">บันทึกรายการใหม่</h2>
+
+            <!-- Instruction Box -->
+            <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-4 rounded-lg" role="alert">
+                <p class="font-bold text-sm">💡 วิธีบันทึก (สำคัญ):</p>
+                <p class="text-xs">
+                    ปุ่ม **"บันทึกรายการหนี้สิน"** จะถูกล็อคไว้
+                    คุณต้องกรอกข้อมูลที่จำเป็น **4 ช่องแรก** ให้ครบถ้วนก่อน ปุ่มจึงจะเปิดใช้งานและกดได้
+                </p>
+            </div>
+            
             <form id="debtForm" class="space-y-4">
 
                 <!-- Input Fields -->
@@ -105,7 +111,7 @@
 
                 <!-- Camera/Image Capture -->
                 <div class="space-y-2 pt-2">
-                    <label class="block text-sm font-medium text-gray-700">📸 ภาพถ่ายลูกค้า (หลักฐาน)</label>
+                    <label class="block text-sm font-medium text-gray-700">📸 ภาพถ่ายลูกค้า (หลักฐาน) <span class="text-gray-400">(ไม่บังคับ)</span></label>
                     <div id="video-container" class="rounded-xl border-4 border-gray-200 shadow-inner">
                         <video id="video-element" autoplay playsinline class="hidden"></video>
                         <img id="snapshot-preview" alt="รูปภาพที่ถ่ายไว้" class="rounded-xl bg-gray-100">
@@ -127,10 +133,15 @@
                 </div>
                 
                 <!-- Submission Button -->
-                <button type="submit" id="submit-btn" disabled
-                        class="w-full btn-action bg-indigo-600 text-white font-bold text-lg py-3 rounded-lg hover:bg-indigo-700 disabled:bg-gray-400 focus:outline-none focus:ring-4 focus:ring-indigo-500 focus:ring-offset-2">
-                    บันทึกข้อมูลเข้า Google Sheet
-                </button>
+                <div class="mt-6">
+                    <p id="submit-status-msg" class="text-center text-sm font-bold text-red-500 mb-2">
+                        🛑 โปรดกรอกข้อมูลที่จำเป็นทั้งหมด 4 ช่องด้านบน
+                    </p>
+                    <button type="submit" id="submit-btn" disabled
+                            class="w-full btn-action bg-indigo-600 text-white font-bold text-lg py-3 rounded-lg hover:bg-indigo-700 disabled:bg-gray-400 focus:outline-none focus:ring-4 focus:ring-indigo-500 focus:ring-offset-2">
+                        บันทึกรายการหนี้สิน
+                    </button>
+                </div>
             </form>
         </div>
     </div>
@@ -150,9 +161,9 @@
     </div>
 
     <script>
-        // --- Google Apps Script Deployment URL ---
-        // ⚠️ ต้องแทนที่ URL ด้านล่างนี้ด้วย URL จริงที่คุณได้จากการ Deploy cob.gs ⚠️
-        const GAS_URL = '#REPLACE_WITH_YOUR_DEPLOYED_APPS_SCRIPT_URL#'; 
+        // --- Google Apps Script Deployment URL (Fixed) ---
+        // ⚠️ ต้องให้ URL นี้ตรงกับ Web App URL ของไฟล์ cob.gs ที่คุณ Deploy!
+        const GAS_URL = 'https://script.google.com/macros/s/AKfycbzPBRd_RaHkZKhH9Tkg9gfWq3I4B9O_G1I9m9RIYO_jHLV5a6KGc9kNq58sHr1OhUFf/exec'; 
 
         // --- DOM Elements ---
         const video = document.getElementById('video-element');
@@ -165,7 +176,7 @@
         const cameraStatus = document.getElementById('camera-status');
         const imageStatus = document.getElementById('image-status');
         const form = document.getElementById('debtForm');
-        const locationAddressInput = document.getElementById('locationAddress');
+        const submitStatusMsg = document.getElementById('submit-status-msg');
         
         const messageBox = document.getElementById('message-box');
         
@@ -214,8 +225,8 @@
             imageStatus.classList.add('hidden');
 
             try {
+                // พยายามใช้กล้องหลัง (environment)
                 cameraStream = await navigator.mediaDevices.getUserMedia({
-                    // พยายามใช้กล้องหลัง (environment)
                     video: { facingMode: { exact: "environment" }, width: { ideal: 640 }, height: { ideal: 480 } }
                 });
             } catch (envError) {
@@ -225,7 +236,10 @@
                         video: { width: { ideal: 640 }, height: { ideal: 480 } }
                     });
                 } catch (defaultError) {
-                    cameraStatus.textContent = '❌ ไม่สามารถเข้าถึงกล้องได้ (โปรดอนุญาต)';
+                    cameraStatus.textContent = '❌ ไม่สามารถเข้าถึงกล้องได้ (โปรดอนุญาตสิทธิ์)';
+                    imageStatus.textContent = '⚠️ การเข้าถึงถูกปฏิเสธ. ตรวจสอบว่าคุณอนุญาตสิทธิ์ในเบราว์เซอร์';
+                    imageStatus.classList.remove('hidden', 'text-green-500');
+                    imageStatus.classList.add('text-red-500');
                     return;
                 }
             }
@@ -253,8 +267,10 @@
             const context = canvas.getContext('2d');
             context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
+            // ใช้ JPEG 70% Quality
             const base64Image = canvas.toDataURL('image/jpeg', 0.7);
 
+            // หยุดกล้องเพื่อประหยัดแบตเตอรี่
             cameraStream.getTracks().forEach(track => track.stop());
             video.srcObject = null;
             video.classList.add('hidden');
@@ -280,32 +296,43 @@
                         const lat = position.coords.latitude;
                         const lon = position.coords.longitude;
                         currentGeolocation = {
-                            link: `แผนที่: https://www.google.com/maps/search/?api=1&query=${lat},${lon}`,
-                            text: `Lat: ${lat.toFixed(4)}, Lon: ${lon.toFixed(4)}`
+                            latitude: lat.toFixed(6),
+                            longitude: lon.toFixed(6),
+                            locationLink: `https://www.google.com/maps/search/?api=1&query=${lat},${lon}`
                         };
                     },
                     (error) => {
-                        currentGeolocation = { link: "ไม่มีพิกัด (โปรดอนุญาต GPS)", text: "ไม่มีพิกัด" };
+                        // ไม่ต้องแจ้งเตือน error แต่ใช้ค่าว่าง/N/A
+                        currentGeolocation = { latitude: 'N/A', longitude: 'N/A', locationLink: 'N/A' };
                     },
                     { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
                 );
             } else {
-                currentGeolocation = { link: "ไม่รองรับ Geolocation", text: "ไม่รองรับ GPS" };
+                currentGeolocation = { latitude: 'N/A', longitude: 'N/A', locationLink: 'N/A' };
             }
         }
         
         function checkFormReadiness() {
             const allRequiredFieldsFilled = form.checkValidity();
             
-            if (allRequiredFieldsFilled && isImageCaptured) {
+            if (allRequiredFieldsFilled) {
                 submitBtn.disabled = false;
-                submitBtn.textContent = 'บันทึกข้อมูลเข้า Google Sheet';
-            } else if (!isImageCaptured) {
-                submitBtn.disabled = true;
-                submitBtn.textContent = 'โปรดถ่ายรูปก่อน';
+                submitStatusMsg.classList.remove('text-red-500', 'text-yellow-500');
+                submitStatusMsg.classList.add('text-green-600');
+                
+                if (isImageCaptured) {
+                    submitBtn.textContent = 'บันทึกรายการหนี้สิน (พร้อมรูปถ่าย)';
+                    submitStatusMsg.textContent = '✅ ข้อมูลครบถ้วน พร้อมบันทึก';
+                } else {
+                    submitBtn.textContent = 'บันทึกรายการหนี้สิน (ไม่มีรูปถ่าย)';
+                    submitStatusMsg.textContent = '✅ ข้อมูลครบถ้วน (ถ่ายรูปหรือไม่ก็ได้)';
+                }
             } else {
                 submitBtn.disabled = true;
+                submitStatusMsg.classList.add('text-red-500');
+                submitStatusMsg.classList.remove('text-green-600');
                 submitBtn.textContent = 'โปรดกรอกข้อมูลให้ครบ';
+                submitStatusMsg.textContent = '🛑 โปรดกรอกข้อมูลที่จำเป็นทั้งหมด 4 ช่องด้านบน';
             }
         }
 
@@ -313,45 +340,26 @@
 
         async function handleSubmit(event) {
             event.preventDefault();
-            
-            if (GAS_URL.includes('#REPLACE_WITH_YOUR_DEPLOYED_APPS_SCRIPT_URL#')) {
-                 showMessage('❌ ข้อผิดพลาด URL', 'โปรดแทนที่ `#REPLACE_WITH_YOUR_DEPLOYED_APPS_SCRIPT_URL#` ในโค้ดด้วย URL Apps Script จริงของคุณ', 'text-red-500');
-                 return;
-            }
-
-            if (!isImageCaptured) {
-                showMessage('⚠ กรอกข้อมูลไม่ครบ', 'โปรดถ่ายรูปหลักฐานก่อนบันทึก', 'text-yellow-500');
-                return;
-            }
 
             submitBtn.disabled = true;
             submitBtn.textContent = 'กำลังส่งข้อมูล...';
             
-            // Extract Latitude and Longitude from the text
-            const latLonMatch = currentGeolocation.text.match(/Lat: (.*?), Lon: (.*?)$/);
-            const latitude = latLonMatch ? latLonMatch[1] : 'N/A';
-            const longitude = latLonMatch ? latLonMatch[2] : 'N/A';
-            
-            // Format location link cleanly
-            const locationLink = currentGeolocation.link.includes('http') 
-                               ? currentGeolocation.link.replace('แผนที่: ', '') 
-                               : '';
-
             const payload = {
                 timestamp: new Date().toLocaleString('th-TH', { hour12: false }),
                 debtorName: document.getElementById('debtorName').value.trim(),
                 amount: parseFloat(document.getElementById('amount').value),
                 product: document.getElementById('product').value.trim(),
-                locationAddress: locationAddressInput.value.trim(), // ส่ง Address ไปด้วย (แม้ว่า cob.gs ล่าสุดอาจยังไม่รองรับก็ตาม แต่เตรียมพร้อมไว้)
-                imageData: imageDataInput.value,
+                locationAddress: document.getElementById('locationAddress').value.trim(),
+                imageData: imageDataInput.value, 
                 
-                // Fields for cob.gs
-                latitude: latitude,
-                longitude: longitude,
-                locationLink: locationLink
+                // Geolocation data
+                latitude: currentGeolocation.latitude,
+                longitude: currentGeolocation.longitude,
+                locationLink: currentGeolocation.locationLink
             };
             
             try {
+                // Fetch API ใช้สำหรับส่ง JSON ไปยัง Apps Script API
                 const response = await fetch(GAS_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -376,9 +384,10 @@
                 }
 
             } catch (e) {
-                showMessage('❌ ข้อผิดพลาดในการเชื่อมต่อ', `ไม่สามารถเชื่อมต่อกับ Web App ได้: ${e.message}`, 'text-red-500');
+                showMessage('❌ ข้อผิดพลาดในการเชื่อมต่อ', `ไม่สามารถเชื่อมต่อกับ Web App ได้: ${e.message}. ตรวจสอบการตั้งค่า 'Who has access' ของ Apps Script`, 'text-red-500');
             } finally {
                 checkFormReadiness();
+                getGeolocation(); // รีเซ็ต GPS
             }
         }
 
